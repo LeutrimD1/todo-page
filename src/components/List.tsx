@@ -21,10 +21,11 @@ const RedDeleteButton = styled(IconButton)({
 
 export default function TodoList() {
   const todos = useSelector((state: RootState) => state.todos);
+  const serverIP = useSelector((state: RootState) => state.server.ip);
   const dispatch = useDispatch<AppDispatch>();
 
     useEffect(() => {
-    fetch("http://localhost:3000/todos")
+    fetch(`http://${serverIP}:3000/todos`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch todos");
         return res.json();
@@ -48,7 +49,7 @@ export default function TodoList() {
                 <RedDeleteButton
                   edge="end"
                   onClick={() =>
-                    fetch(`http://localhost:3000/todos/${index}`, {
+                    fetch(`http://${serverIP}:3000/todos/${index}`, {
                       method: "DELETE",
                     })
                       .then((res) => {

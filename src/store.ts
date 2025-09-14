@@ -16,11 +16,31 @@ const todosSlice = createSlice({
   },
 });
 
+const serverSlice = createSlice({
+  name: "server",
+  initialState: {
+    ip: null as string | null,
+    isConfigured: false
+  },
+  reducers: {
+    setServerIP: (state, action: PayloadAction<string>) => {
+      state.ip = action.payload;
+      state.isConfigured = true;
+    },
+    clearServerIP: (state) => {
+      state.ip = null;
+      state.isConfigured = false;
+    }
+  },
+});
+
 export const { addTodo, removeTodo, setTodos } = todosSlice.actions;
+export const { setServerIP, clearServerIP } = serverSlice.actions;
 
 export const store = configureStore({
   reducer: {
     todos: todosSlice.reducer,
+    server: serverSlice.reducer,
   },
 });
 

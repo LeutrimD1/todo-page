@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { TextField, Button, styled } from "@mui/material";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { addTodo } from "../store";
-import type { AppDispatch } from "../store";
+import type { AppDispatch, RootState } from "../store";
 
 const Container = styled("div")({
   display: "flex",
@@ -11,6 +11,7 @@ const Container = styled("div")({
 
 export default function SearchBar() {
   const [value, setValue] = useState("");
+  const serverIP = useSelector((state: RootState) => state.server.ip);
   const dispatch = useDispatch<AppDispatch>();
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -30,9 +31,13 @@ export default function SearchBar() {
           type="submit"
           variant="contained"
           onClick={() => {
-            if (!value.trim()) return; // ignore empty input
+            if (!value.trim()) return; 
+            if (!serverIP) { // TODO: fix?
+              console.error("Server IP not configured");
+              return;
+            }
 
-            fetch("http://localhost:3000/todos", {
+            fetch(`http://${serverIP}:3000/todos`, {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
