@@ -4,75 +4,117 @@ import { styled } from "@mui/material"
 import { store, setServerIP } from "./store";
 import { Provider } from "react-redux";
 import TodoList from './components/List';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 const Container = styled("div")({
   display: 'flex',
   flexDirection: 'column'
 })
 
-// Hardcoded encrypted value that contains the server IP
-const ENCRYPTED_SERVER_CONFIG = ""; // Will be populated with encrypted IP address
+const ENCRYPTED_SERVER_CONFIG = "Yyj6XEkiyFsisJh+oAxFMybkjBIZ/b4bJiWkUImCml0="; 
 
-// Temporary decryption function - accepts "test" passphrase
-function decryptServerConfig(passphrase: string): string | null {
-  if (passphrase === "test") {
-    return "127.0.0.1"; // Temporary IP for testing
+async function decryptServerConfig(passphrase: string): Promise<string | null> {
+  try {
+    const encoder = new TextEncoder();
+    const passphraseBuffer = encoder.encode(passphrase);
+    const keyMaterial = await crypto.subtle.digest('SHA-256', passphraseBuffer);
+    
+    const key = await crypto.subtle.importKey(
+      'raw',
+      keyMaterial,
+      { name: 'AES-CBC' },
+      false,
+      ['decrypt']
+    );
+    
+    const combined = Uint8Array.from(atob(ENCRYPTED_SERVER_CONFIG), c => c.charCodeAt(0));
+    
+    const iv = combined.slice(0, 16);
+    const encryptedData = combined.slice(16);
+    
+    const decryptedBuffer = await crypto.subtle.decrypt(
+      {
+        name: 'AES-CBC',
+        iv: iv
+      },
+      key,
+      encryptedData
+    );
+    
+    const decoder = new TextDecoder();
+    const decrypted = decoder.decode(decryptedBuffer);
+    
+    return decrypted;
+  } catch (error) {
+    console.error('Decryption failed:', error);
+    return null;
   }
-  return null;
 }
 
-// Function to add server IP to Redux store
 function addServerIPToStore(serverIP: string): void {
   store.dispatch(setServerIP(serverIP));
 }
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const hasInitialized = useRef<boolean>(false);
 
   useEffect(() => {
-    const cookieName = "app_passphrase";
-    const cookieValue = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith(cookieName + "="));
+    if (hasInitialized.current) return;
+    hasInitialized.current = true;
 
-    if (cookieValue) {
-      const passphrase = cookieValue.split("=")[1];
-      
-      // Attempt to decrypt server configuration
-      const serverIP = decryptServerConfig(passphrase);
-      
-      if (serverIP) {
-        addServerIPToStore(serverIP);
-        setIsAuthenticated(true);
+    const checkAuth = async () => {
+      const cookieName = "app_passphrase";
+      const cookieValue = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith(cookieName + "="));
+
+      if (cookieValue) {
+        const passphrase = cookieValue.split("=")[1];
+        
+        const serverIP = await decryptServerConfig(passphrase);
+        
+        if (serverIP) {
+          addServerIPToStore(serverIP);
+          setIsAuthenticated(true);
+        } else {
+          document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+          await promptForPassphrase();
+        }
       } else {
-        // Invalid passphrase - remove cookie and prompt again
-        document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
-        promptForPassphrase();
+        await promptForPassphrase();
       }
-    } else {
-      promptForPassphrase();
-    }
+      
+      setIsLoading(false);
+    };
+
+    checkAuth();
   }, []);
 
-  const promptForPassphrase = () => {
-    const passphrase = window.prompt("Enter your access passphrase:");
-    if (passphrase) {
-      const serverIP = decryptServerConfig(passphrase);
+  const promptForPassphrase = async (): Promise<void> => {
+    while (true) {
+      const passphrase = window.prompt("Enter your access passphrase:");
+      
+      if (!passphrase) {
+        alert("Passphrase is required to use the app.");
+        continue;
+      }
+      
+      const serverIP = await decryptServerConfig(passphrase);
       
       if (serverIP) {
-        document.cookie = `app_passphrase=${passphrase}; path=/; max-age=${60*60*24*365}`; // 1 year
+        document.cookie = `app_passphrase=${passphrase}; path=/; max-age=${60*60*24*365}`;
         addServerIPToStore(serverIP);
         setIsAuthenticated(true);
+        break;
       } else {
         alert("Invalid passphrase. Please try again.");
-        promptForPassphrase(); 
       }
-    } else {
-      alert("Passphrase is required to use the app.");
     }
   };
 
+  if (isLoading) return <div>Loading...</div>;
   if (!isAuthenticated) return null; 
 
   return (
