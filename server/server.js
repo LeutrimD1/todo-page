@@ -1,5 +1,5 @@
 import { createServer } from "http";
-import { parse } from "url"; // for parsing URL paths
+import { parse } from "url";
 
 let todos = [];
 
@@ -10,8 +10,17 @@ const headers = {
   "Access-Control-Allow-Headers": "Content-Type",
 };
 
+function sanitizeHtml(text) {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#x27;")
+    .replace(/\//g, "&#x2F;");
+}
+
 const server = createServer((req, res) => {
-  // Handle preflight OPTIONS request
   if (req.method === "OPTIONS") {
     res.writeHead(204, headers);
     return res.end();
@@ -24,12 +33,26 @@ const server = createServer((req, res) => {
     res.end(JSON.stringify(todos));
   } else if (url.pathname === "/todos" && req.method === "POST") {
     let body = "";
-    req.on("data", (chunk) => (body += chunk));
+    let bodySize = 0;
+    
+    req.on("data", (chunk) => {
+      bodySize += chunk.length;
+      if (bodySize > 10000) {
+        res.writeHead(413, headers);
+        res.end(JSON.stringify({ error: "Payload too large" }));
+        return;
+      }
+      body += chunk;
+    });
+    
     req.on("end", () => {
       try {
         const data = JSON.parse(body);
-        if (!data.todo || typeof data.todo !== "string") throw new Error();
-        todos.push(data.todo);
+        if (!data.todo || typeof data.todo !== "string" || data.todo.length > 1000) {
+          throw new Error();
+        }
+        const sanitizedTodo = sanitizeHtml(data.todo.trim());
+        todos.push(sanitizedTodo);
         res.writeHead(201, headers);
         res.end(JSON.stringify({ success: true, todos }));
       } catch {
