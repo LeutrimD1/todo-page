@@ -65,7 +65,7 @@ export default function TodoList() {
                 </RedDeleteButton>
               }
             >
-              <ListItemText primary={todo} secondary="secondary" />
+              <ListItemText primary={todo} />
             </ListItem>
             <Divider />
           </React.Fragment>

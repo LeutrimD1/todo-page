@@ -11,7 +11,7 @@ const Container = styled("div")({
   flexDirection: 'column'
 })
 
-const ENCRYPTED_SERVER_CONFIG = "Yyj6XEkiyFsisJh+oAxFMybkjBIZ/b4bJiWkUImCml0="; 
+const ENCRYPTED_SERVER_CONFIG = "x8TdmTZgO0baHFa1bf/9THn7++CMhGXsA/4LlkjInf0="; 
 
 async function decryptServerConfig(passphrase: string): Promise<string | null> {
   try {
