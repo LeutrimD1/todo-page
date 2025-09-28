@@ -25,7 +25,7 @@ export default function TodoList() {
   const dispatch = useDispatch<AppDispatch>();
 
     useEffect(() => {
-    fetch(`https://${serverIP}:3000/todos`)
+    fetch(`https://${serverIP}:443/todos`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch todos");
         return res.json();
@@ -49,7 +49,7 @@ export default function TodoList() {
                 <RedDeleteButton
                   edge="end"
                   onClick={() =>
-                    fetch(`https://${serverIP}:3000/todos/${index}`, {
+                    fetch(`https://${serverIP}:443/todos/${index}`, {
                       method: "DELETE",
                     })
                       .then((res) => {
