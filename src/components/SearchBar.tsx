@@ -37,7 +37,7 @@ export default function SearchBar() {
               return;
             }
 
-            fetch(`http://${serverIP}:3000/todos`, {
+            fetch(`https://${serverIP}:3000/todos`, {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
