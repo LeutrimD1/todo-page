@@ -22,8 +22,8 @@ function sanitizeHtml(text) {
 }
 
 const options = {
-  key: fs.readFileSync("server.key"),   // your private key
-  cert: fs.readFileSync("server.crt"),  // your certificate
+  key: fs.readFileSync("./certs/private.key.pem"),   // your private key
+  cert: fs.readFileSync("./certs/domain.cert.pem"),  // your certificate
   // If you have an intermediate cert, add: ca: fs.readFileSync("chain.pem")
 };
 
