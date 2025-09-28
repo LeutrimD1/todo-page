@@ -5,7 +5,7 @@ services:
     build: .
     ports:
       - "443:443"  # Expose HTTPS port
-    restart: unless-stopped
+    restart: always  # Changed from unless-stopped to always for auto-restart
     read_only: true
     tmpfs:
       - /tmp:noexec,nosuid,size=10M
