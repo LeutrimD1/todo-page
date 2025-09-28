@@ -11,6 +11,8 @@ RUN chown -R nodeuser:nodegroup /app
 
 USER nodeuser
 
-EXPOSE 3000
+EXPOSE 443
+
+ENV SSL_DIR=/etc/ssl/private
 
 CMD ["node", "server.js"]

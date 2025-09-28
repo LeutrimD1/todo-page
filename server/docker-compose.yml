@@ -4,7 +4,7 @@ services:
   todo-server:
     build: .
     ports:
-      - "3000:3000"
+      - "443:443"  # Expose HTTPS port
     restart: unless-stopped
     read_only: true
     tmpfs:
@@ -20,8 +20,10 @@ services:
       - todo-network
     environment:
       - NODE_ENV=production
+    volumes:
+      - ./certs:/etc/ssl/private:ro   # Mount directory containing server.key, server.crt, and chain.pem
     healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/todos', (res) => process.exit(res.statusCode === 200 ? 0 : 1))"]
+      test: ["CMD", "node", "-e", "require('https').get('https://localhost/todos', (res) => process.exit(res.statusCode === 200 ? 0 : 1))"]
       interval: 30s
       timeout: 10s
       retries: 3

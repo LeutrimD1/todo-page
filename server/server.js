@@ -1,5 +1,6 @@
-import { createServer } from "http";
+import { createServer } from "https";
 import { parse } from "url";
+import fs from "fs";
 
 let todos = [];
 
@@ -20,7 +21,13 @@ function sanitizeHtml(text) {
     .replace(/\//g, "&#x2F;");
 }
 
-const server = createServer((req, res) => {
+const options = {
+  key: fs.readFileSync("server.key"),   // your private key
+  cert: fs.readFileSync("server.crt"),  // your certificate
+  // If you have an intermediate cert, add: ca: fs.readFileSync("chain.pem")
+};
+
+const server = createServer(options, (req, res) => {
   if (req.method === "OPTIONS") {
     res.writeHead(204, headers);
     return res.end();
@@ -34,7 +41,7 @@ const server = createServer((req, res) => {
   } else if (url.pathname === "/todos" && req.method === "POST") {
     let body = "";
     let bodySize = 0;
-    
+
     req.on("data", (chunk) => {
       bodySize += chunk.length;
       if (bodySize > 10000) {
@@ -44,7 +51,7 @@ const server = createServer((req, res) => {
       }
       body += chunk;
     });
-    
+
     req.on("end", () => {
       try {
         const data = JSON.parse(body);
@@ -75,6 +82,6 @@ const server = createServer((req, res) => {
   }
 });
 
-server.listen(3000, () => {
-  console.log("Todo server running at http://localhost:3000");
+server.listen(443, () => {
+  console.log("Todo server running at https://localhost");
 });
