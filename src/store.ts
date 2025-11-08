@@ -1,17 +1,22 @@
 import { configureStore, createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
+interface Todo {
+  id: number;
+  todo: string;
+}
+
 const todosSlice = createSlice({
   name: "todos",
-  initialState: [] as string[],
+  initialState: [] as Todo[], 
   reducers: {
-    addTodo: (state, action: PayloadAction<string>) => {
+    addTodo: (state, action: PayloadAction<Todo>) => { 
       state.push(action.payload);
     },
-    removeTodo: (state, action: PayloadAction<number>) => {
-      state.splice(action.payload, 1);
+    removeTodo: (state, action: PayloadAction<number>) => {  
+      return state.filter(todo => todo.id !== action.payload); 
     },
-    setTodos: (_: unknown, action: PayloadAction<string[]>) => {
-      return action.payload; // replace the whole state with the fetched todos
+    setTodos: (_: unknown, action: PayloadAction<Todo[]>) => { 
+      return action.payload;
     },
   },
 });

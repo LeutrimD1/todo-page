@@ -15,7 +15,7 @@ import React, { useEffect } from "react";
 const RedDeleteButton = styled(IconButton)({
   color: "red",
   "&:focus": {
-    outline: "none", // removes the black border
+    outline: "none",
   },
 });
 
@@ -24,8 +24,8 @@ export default function TodoList() {
   const serverIP = useSelector((state: RootState) => state.server.ip);
   const dispatch = useDispatch<AppDispatch>();
 
-    useEffect(() => {
-    fetch(`https://${serverIP}:443/todos`)
+  useEffect(() => {
+    fetch(`https://${serverIP}/todos`) 
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch todos");
         return res.json();
@@ -36,25 +36,24 @@ export default function TodoList() {
       .catch((err) => {
         console.error("Error fetching todos:", err);
       });
-  }, [dispatch]);
+  }, [dispatch, serverIP]);
 
   return (
     <>
       <List>
-        {todos.map((todo, index) => (
-          <React.Fragment
-          key={index}>
+        {todos.map((todo) => (  
+          <React.Fragment key={todo.id}> 
             <ListItem
               secondaryAction={
                 <RedDeleteButton
                   edge="end"
                   onClick={() =>
-                    fetch(`https://${serverIP}:443/todos/${index}`, {
+                    fetch(`https://${serverIP}/todos/${todo.id}`, { 
                       method: "DELETE",
                     })
                       .then((res) => {
                         if (!res.ok) throw new Error("Failed to delete todo");
-                        dispatch(removeTodo(index));
+                        dispatch(removeTodo(todo.id)); 
                       })
                       .catch((err) =>
                         console.error("Error deleting todo:", err)
@@ -65,7 +64,7 @@ export default function TodoList() {
                 </RedDeleteButton>
               }
             >
-              <ListItemText primary={todo} />
+              <ListItemText primary={todo.todo} /> 
             </ListItem>
             <Divider />
           </React.Fragment>

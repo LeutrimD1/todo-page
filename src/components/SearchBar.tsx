@@ -32,12 +32,12 @@ export default function SearchBar() {
           variant="contained"
           onClick={() => {
             if (!value.trim()) return; 
-            if (!serverIP) { // TODO: fix?
+            if (!serverIP) {
               console.error("Server IP not configured");
               return;
             }
 
-            fetch(`https://${serverIP}:443/todos`, {
+            fetch(`https://${serverIP}/todos`, {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
@@ -48,9 +48,9 @@ export default function SearchBar() {
                 if (!res.ok) throw new Error("Failed to add todo");
                 return res.json();
               })
-              .then(() => {
-                dispatch(addTodo(value));
-                setValue(""); // clear input
+              .then((data) => {  
+                dispatch(addTodo({ id: data.id, todo: value }));
+                setValue(""); 
               })
               .catch((err) => console.error(err));
           }}
