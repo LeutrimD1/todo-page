@@ -25,7 +25,7 @@ export default function TodoList() {
   const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
-    fetch(`https://${serverIP}/todos`) 
+    fetch(`https://${serverIP}/todos`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch todos");
         return res.json();
@@ -41,19 +41,19 @@ export default function TodoList() {
   return (
     <>
       <List>
-        {todos.map((todo) => (  
-          <React.Fragment key={todo.id}> 
+        {todos.map((todo) => (
+          <React.Fragment key={todo.id}>
             <ListItem
               secondaryAction={
                 <RedDeleteButton
                   edge="end"
                   onClick={() =>
-                    fetch(`https://${serverIP}/todos/${todo.id}`, { 
+                    fetch(`https://${serverIP}/todos/${todo.id}`, {
                       method: "DELETE",
                     })
                       .then((res) => {
                         if (!res.ok) throw new Error("Failed to delete todo");
-                        dispatch(removeTodo(todo.id)); 
+                        dispatch(removeTodo(todo.id));
                       })
                       .catch((err) =>
                         console.error("Error deleting todo:", err)
@@ -64,7 +64,10 @@ export default function TodoList() {
                 </RedDeleteButton>
               }
             >
-              <ListItemText primary={todo.todo} /> 
+              <ListItemText primary={todo.todo} sx={{
+                wordWrap: 'break-word',
+                overflowWrap: 'break-word',
+              }} />
             </ListItem>
             <Divider />
           </React.Fragment>
