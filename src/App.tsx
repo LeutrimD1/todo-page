@@ -11,7 +11,7 @@ const Container = styled("div")({
   flexDirection: 'column'
 })
 
-const ENCRYPTED_SERVER_CONFIG = "NA8XcPcjZrQMQgdMUaJ8HUmHRy12jpTm4/V4banQP/wiK/CM0lnUXOjNWAs3UzSn"; 
+const ENCRYPTED_SERVER_CONFIG = "uoGfqn0hSiENnhVfHtxc7mDPEYmp2D/r2C+aro0XuIcuLrbSEO6uxzkkDQbiPUOY"; 
 
 async function decryptServerConfig(passphrase: string): Promise<string | null> {
   try {
@@ -94,7 +94,7 @@ export default function App() {
 
   const promptForPassphrase = async (): Promise<void> => {
     while (true) {
-      const passphrase = window.prompt("Enter your access passphrase:");
+      const passphrase = window.prompt("Enter 'todo-demo' to set access cookie:");
       
       if (!passphrase) {
         alert("Passphrase is required to use the app.");
